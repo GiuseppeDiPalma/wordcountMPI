@@ -18,8 +18,9 @@ typedef struct{
     int end;
     char fileName[MAXFILENAME];
     int rank;
-}PartitionedRow;
+}PartitionedWord;
 
 long int countWordFile(char *file_name);
 long readFiles(char *path, FileRowSize *fileSpec);
 void elementSplit(long *wordForProcessor, long sumWords, int proc);
+void wordForProcessor(PartitionedWord *w, long *wordForProcessor, FileRowSize *wordForFile, int proc);

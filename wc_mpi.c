@@ -6,6 +6,8 @@
 #include "utils.h"
 #include "fileManage.h"
 
+#define WORDS_PROCESSOR 100
+
 void main(int argc, char *argv[])
 {
     int rank, size;
@@ -25,10 +27,10 @@ void main(int argc, char *argv[])
     FileRowSize fileSpec[10];
     parse_arg(argc, argv, &dirFile);
 
-    PartitionedRow n_words[100];
+    PartitionedWord n_words[WORDS_PROCESSOR];
     long int wordsForProcessor[size];
 
-    printf("size: %d\n", size);
+    printf("size: [%d]\n\n", size);
     if(rank==0)
     {
         printf("(START) - MASTER(#%d) - (START)\n", rank);
@@ -36,13 +38,13 @@ void main(int argc, char *argv[])
 
         long int sumWord = readFiles(dirFile, fileSpec);
         elementSplit(wordsForProcessor, sumWord, size);
-        
+        printf("total words %ld\n", sumWord);
         for (int i = 0; i < size; i++)
         {
-            printf("word for process %d - %ld\n", rank, wordsForProcessor[i]);
+            printf("proc %d - processa %ld parole\n", i, wordsForProcessor[i]);
         }
-        
-        
+
+        wordForProcessor(n_words, wordsForProcessor, fileSpec, size);
 
         printf("\n(END) - MASTER(#%d) - (END)\n", rank);
     }

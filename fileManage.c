@@ -87,7 +87,8 @@ long readFiles(char *path, FileRowSize *fileSpec)
 void elementSplit(long *wordForProcessor, long sumWords, int proc)
 {
 
-    int mod = sumWords % proc;
+    long mod = sumWords % proc;
+    //printf("sumWords: %ld || proc: %d || MOD: %ld\n", sumWords, proc, mod);
 
     if (mod == 0)
     {
@@ -111,5 +112,49 @@ void elementSplit(long *wordForProcessor, long sumWords, int proc)
             wordForProcessor[module2] = wordForProcessor[module2] + 1;
             mod--; j++;
         }
+    }
+}
+
+void wordForProcessor(PartitionedWord *w, long *wordForProcessor, FileRowSize *wordForFile, int proc)
+{
+    int j = 0; //stuttura
+    int k = 0; //file
+    int i = 0;
+    signed long diff = 0;
+    signed long diff_2 = 0;
+    long surplus = 0;
+    while(i < proc)
+    { 
+        w[j].rank=i;
+        w[j].start = surplus;
+        signed long diff = wordForProcessor[i]-wordForFile[k].rowSize;   
+        if (diff >= 0 && k<10)
+        {
+            printf("1= Il processore %d ha %ld parole da processare", i, wordForProcessor[i]);
+            wordForProcessor[i]=wordForProcessor[i]-wordForFile[k].rowSize;
+            w[j].end = wordForFile[k].rowSize + surplus;
+            strcpy(w[j].fileName, wordForFile[k].fileName);
+            printf(" in %s || Inizio %d, Fine %d || restano altre %ld\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
+            surplus = 0;
+            j++; k++;
+        }
+        else
+        {
+            diff_2 = wordForFile[k].rowSize - wordForProcessor[i];
+
+            if(diff_2 < 0)
+            {
+                w[j].end = wordForFile[k].rowSize;
+            }
+            else
+            {
+                wordForFile[k].rowSize = wordForFile[k].rowSize - wordForProcessor[i];
+                surplus = wordForProcessor[i] + 1;
+                w[j].end = wordForProcessor[i];
+                printf("2= Il process %d ha taglia rimanente %ld\n", i, wordForProcessor[i]);
+                wordForProcessor[i] = 0;
+            }
+            i++;
+        }    
     }
 }
