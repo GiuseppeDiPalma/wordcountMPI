@@ -1,5 +1,5 @@
 wc_mpi.out: wc_mpi.o fileManage.o utils.o
-	mpicc wc_mpi.o fileManage.o utils.o -lm -o wc_mpi.out
+	mpicc wc_mpi.o fileManage.o utils.o -I -lm -o wc_mpi.out
 
 utils.o: utils.c
 	gcc -c utils.c

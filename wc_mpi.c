@@ -4,6 +4,7 @@
 #include <mpi.h>
 
 #include "utils.h"
+#include "fileManage.h"
 
 void main(int argc, char *argv[])
 {
@@ -18,14 +19,22 @@ void main(int argc, char *argv[])
     double start = MPI_Wtime();
 
     printf("(START) - MPI WORD COUNT - (START)\n\n");
+    
+    char *dirFile;
 
+    FileRowSize fileSpec[10];
+    parse_arg(argc, argv, &dirFile);
+    printf("\nDirectory file ---> %s\n", dirFile);
+
+    PartitionedRow n_words[100];
+    
+    long int wordsForProcessor[rank];
     if(rank==0)
     {
         printf("(START) - MASTER(#%d) - (START)\n", rank);
 
-        char *dirFile;
-        parse_arg(argc, argv, &dirFile);
-        printf("\nDirectory file ---> %s\n", dirFile);
+        long int sumWord = readFiles(dirFile, fileSpec);   
+        elementSplit(wordsForProcessor, sumWord, size);
 
         printf("\n(END) - MASTER(#%d) - (END)\n", rank);
     }
