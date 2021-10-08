@@ -33,7 +33,7 @@ void main(int argc, char *argv[])
     {
         printf("(START) - MASTER(#%d) - (START)\n", rank);
 
-        long int sumWord = readFiles(dirFile, fileSpec);   
+        long int sumWord = readFiles(dirFile, fileSpec);
         elementSplit(wordsForProcessor, sumWord, size);
 
         printf("\n(END) - MASTER(#%d) - (END)\n", rank);

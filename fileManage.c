@@ -48,13 +48,10 @@ long readFiles(char *path, FileRowSize *fileSpec)
             if(strcmp(d->d_name, "..")!=0 && strcmp(d->d_name, ".")!=0)
             {
                 strcpy(fileSpec[i].fileName, d->d_name);
-                char *mainPath = NULL;
-                // ! Questo è da aggiustare, far passare tutti i file e non solo uno!
+                char *mainPath = (char *)malloc(sizeof(char));
                 strcpy(mainPath, path);
                 strcat(mainPath, d->d_name);
-                printf("size path: %ld - %s\n", sizeof(path), path);
-                printf("size mainpath: %ld - %s\n", sizeof(mainPath), mainPath);
-                fileSpec[i].rowSize = countWordFile("files/file6.txt");
+                fileSpec[i].rowSize = countWordFile(mainPath);
                 wordSum = wordSum += fileSpec[i].rowSize;
                 printf("\til file: %s ---> ha %ld words\n", fileSpec[i].fileName, fileSpec[i].rowSize);
                 i++;
