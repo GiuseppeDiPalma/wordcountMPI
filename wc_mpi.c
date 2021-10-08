@@ -24,17 +24,25 @@ void main(int argc, char *argv[])
 
     FileRowSize fileSpec[10];
     parse_arg(argc, argv, &dirFile);
-    printf("\nDirectory file ---> %s\n", dirFile);
 
     PartitionedRow n_words[100];
-    
-    long int wordsForProcessor[rank];
+    long int wordsForProcessor[size];
+
+    printf("size: %d\n", size);
     if(rank==0)
     {
         printf("(START) - MASTER(#%d) - (START)\n", rank);
+        printf("Directory file ---> %s\n", dirFile);
 
         long int sumWord = readFiles(dirFile, fileSpec);
         elementSplit(wordsForProcessor, sumWord, size);
+        
+        for (int i = 0; i < size; i++)
+        {
+            printf("word for process %d - %ld\n", rank, wordsForProcessor[i]);
+        }
+        
+        
 
         printf("\n(END) - MASTER(#%d) - (END)\n", rank);
     }

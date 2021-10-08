@@ -33,6 +33,14 @@ long int countWordFile(char *file_name)
   return word_count;
 }
 
+/**
+ * @brief read all file in a directory, fill a struct with fileName e number of words
+ * for any file, after this return sum of all words in all file.
+ * 
+ * @param path target directory path
+ * @param fileSpec struct with file specification
+ * @return long sum of all words in all file
+ */
 long readFiles(char *path, FileRowSize *fileSpec)
 {
     DIR *dir;
@@ -53,7 +61,7 @@ long readFiles(char *path, FileRowSize *fileSpec)
                 strcat(mainPath, d->d_name);
                 fileSpec[i].rowSize = countWordFile(mainPath);
                 wordSum = wordSum += fileSpec[i].rowSize;
-                printf("\til file: %s ---> ha %ld words\n", fileSpec[i].fileName, fileSpec[i].rowSize);
+                //printf("\til file: %s ---> ha %ld words\n", fileSpec[i].fileName, fileSpec[i].rowSize);
                 i++;
             }
         }
@@ -64,38 +72,35 @@ long readFiles(char *path, FileRowSize *fileSpec)
         perror("Could not open directory!");
         exit(0);
     }
-
     return wordSum;
 }
 
 /**
- * Function:  elementSplit|| 
- *  
- * It fills an array, where at each position is the number 
- * of bytes that a process will have to compute. 
+ * @brief It fills an array, where at each position is the number 
+ * of word that a process will have to compute. 
  * If the number is not divisible some position will be oversized.
  *  
- * @param wordForProcessor: array of number of bytes per processor
- * @param fileSize: sum of all bytes of files in directory
+ * @param wordForProcessor: array of number of word per processor
+ * @param sumWords: sum of all word of files in directory
  * @param proc: numer of processor in execution
  */
-void elementSplit(long *wordForProcessor, long fileSize, int proc)
+void elementSplit(long *wordForProcessor, long sumWords, int proc)
 {
 
-    int mod = fileSize % proc;
+    int mod = sumWords % proc;
 
     if (mod == 0)
     {
         for (int i = 0; i < proc; i++)
         {
-            wordForProcessor[i] = fileSize / proc;
+            wordForProcessor[i] = sumWords / proc;
         }
     }
     else
     {
         for (int i = 0; i < proc; i++)
         {
-            wordForProcessor[i] = fileSize / proc;
+            wordForProcessor[i] = sumWords / proc;
         }
 
         int j=0;

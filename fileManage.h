@@ -22,4 +22,4 @@ typedef struct{
 
 long int countWordFile(char *file_name);
 long readFiles(char *path, FileRowSize *fileSpec);
-void elementSplit(long *wordForProcessor, long fileSize, int proc);
+void elementSplit(long *wordForProcessor, long sumWords, int proc);
