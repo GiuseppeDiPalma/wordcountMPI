@@ -41,7 +41,7 @@ long int countWordFile(char *file_name)
  * @param fileSpec struct with file specification
  * @return long sum of all words in all file
  */
-long readFiles(char *path, FileRowSize *fileSpec)
+long readFilesAndSum(char *path, FileWordSize *fileSpec)
 {
     DIR *dir;
     struct dirent *d;
@@ -59,9 +59,9 @@ long readFiles(char *path, FileRowSize *fileSpec)
                 char *mainPath = (char *)malloc(sizeof(char));
                 strcpy(mainPath, path);
                 strcat(mainPath, d->d_name);
-                fileSpec[i].rowSize = countWordFile(mainPath);
-                wordSum = wordSum += fileSpec[i].rowSize;
-                //printf("\til file: %s ---> ha %ld words\n", fileSpec[i].fileName, fileSpec[i].rowSize);
+                fileSpec[i].wordNumber = countWordFile(mainPath);
+                wordSum = wordSum += fileSpec[i].wordNumber;
+                //printf("\til file: %s ---> ha %ld words\n", fileSpec[i].fileName, fileSpec[i].wordNumber);
                 i++;
             }
         }
@@ -87,7 +87,7 @@ long readFiles(char *path, FileRowSize *fileSpec)
 void elementSplit(long *wordForProcessor, long sumWords, int proc)
 {
 
-    long mod = sumWords % proc;
+    int mod = sumWords % proc;
     //printf("sumWords: %ld || proc: %d || MOD: %ld\n", sumWords, proc, mod);
 
     if (mod == 0)
@@ -115,46 +115,48 @@ void elementSplit(long *wordForProcessor, long sumWords, int proc)
     }
 }
 
-void wordForProcessor(PartitionedWord *w, long *wordForProcessor, FileRowSize *wordForFile, int proc)
+void wordForProcessor(PartitionedWord *w, long *wordForProcessor, FileWordSize *wordForFile, int proc)
 {
     int j = 0; //stuttura
     int k = 0; //file
     int i = 0;
     signed long diff = 0;
-    signed long diff_2 = 0;
+    
     long surplus = 0;
+
     while(i < proc)
     { 
         w[j].rank=i;
         w[j].start = surplus;
-        signed long diff = wordForProcessor[i]-wordForFile[k].rowSize;   
+        signed long diff = wordForProcessor[i]-wordForFile[k].wordNumber;   
         if (diff >= 0 && k<10)
         {
-            printf("1= Il processore %d ha %ld parole da processare", i, wordForProcessor[i]);
-            wordForProcessor[i]=wordForProcessor[i]-wordForFile[k].rowSize;
-            w[j].end = wordForFile[k].rowSize + surplus;
+            //printf("1= Il processore %d ha %ld parole da processare", i, wordForProcessor[i]);
+            wordForProcessor[i]=wordForProcessor[i]-wordForFile[k].wordNumber;
+            w[j].end = wordForFile[k].wordNumber + surplus;
             strcpy(w[j].fileName, wordForFile[k].fileName);
-            printf(" in %s || Inizio %d, Fine %d || restano altre %ld\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
+            //printf(" in %s || Inizio %d, Fine %d || restano altre %ld\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
             surplus = 0;
             j++; k++;
         }
         else
         {
-            diff_2 = wordForFile[k].rowSize - wordForProcessor[i];
+            signed long diff_2 = 0;
+            diff_2 = wordForFile[k].wordNumber - wordForProcessor[i];
 
             if(diff_2 < 0)
             {
-                w[j].end = wordForFile[k].rowSize;
+                w[j].end = wordForFile[k].wordNumber;
             }
             else
             {
-                wordForFile[k].rowSize = wordForFile[k].rowSize - wordForProcessor[i];
+                wordForFile[k].wordNumber = wordForFile[k].wordNumber - wordForProcessor[i];
                 surplus = wordForProcessor[i] + 1;
                 w[j].end = wordForProcessor[i];
-                printf("2= Il process %d ha taglia rimanente %ld\n", i, wordForProcessor[i]);
+                //printf("2= Il process %d ha taglia rimanente %ld\n", i, wordForProcessor[i]);
                 wordForProcessor[i] = 0;
             }
             i++;
-        }    
+        }
     }
 }

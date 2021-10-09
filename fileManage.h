@@ -10,17 +10,17 @@
 
 typedef struct{
     char fileName[MAXFILENAME];
-    long int rowSize;
-}FileRowSize;
+    long int wordNumber;
+}FileWordSize;
 
 typedef struct{
-    int start;
-    int end;
     char fileName[MAXFILENAME];
     int rank;
+    int start;
+    int end;
 }PartitionedWord;
 
 long int countWordFile(char *file_name);
-long readFiles(char *path, FileRowSize *fileSpec);
+long readFilesAndSum(char *path, FileWordSize *fileSpec);
 void elementSplit(long *wordForProcessor, long sumWords, int proc);
-void wordForProcessor(PartitionedWord *w, long *wordForProcessor, FileRowSize *wordForFile, int proc);
+void wordForProcessor(PartitionedWord *w, long *wordForProcessor, FileWordSize *wordForFile, int proc);
