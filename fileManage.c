@@ -115,6 +115,14 @@ void elementSplit(long *wordForProcessor, long sumWords, int proc)
     }
 }
 
+/**
+ * @brief 
+ * 
+ * @param w struttura contentenete informazioni da passare ai processori, il rank, il nome del file da elaborare e da dove iniziare e dove finire.
+ * @param wordForProcessor 
+ * @param wordForFile 
+ * @param proc 
+ */
 void wordForProcessor(PartitionedWord *w, long *wordForProcessor, FileWordSize *wordForFile, int proc)
 {
     int j = 0; //stuttura

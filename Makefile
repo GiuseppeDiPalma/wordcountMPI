@@ -1,5 +1,5 @@
-wc_mpi.out: wc_mpi.o fileManage.o utils.o
-	mpicc wc_mpi.o fileManage.o utils.o -I -lm -o wc_mpi.out
+wc_mpi.out: wc_mpi.o fileManage.o utils.o wordManage.o
+	mpicc wc_mpi.o fileManage.o utils.o wordManage.o -I -lm -o wc_mpi.out
 
 utils.o: utils.c
 	gcc -c utils.c
@@ -7,7 +7,10 @@ utils.o: utils.c
 filemanage.o: fileManage.c
 	gcc -c fileManage.c
 
-wc_mpi.o: wc_mpi.c fileManage.o utils.o
+wordmanage.o: wordManage.c
+	gcc -c wordManage.c
+
+wc_mpi.o: wc_mpi.c fileManage.o utils.o wordManage.o
 	mpicc -c wc_mpi.c
 
 clean:
