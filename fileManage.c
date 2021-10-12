@@ -55,10 +55,10 @@ long readFilesAndSum(char *path, FileWordSize *fileSpec)
         {
             if(strcmp(d->d_name, "..")!=0 && strcmp(d->d_name, ".")!=0)
             {
-                strcpy(fileSpec[i].fileName, d->d_name);
                 char *mainPath = (char *)malloc(sizeof(char));
                 strcpy(mainPath, path);
                 strcat(mainPath, d->d_name);
+                strcpy(fileSpec[i].fileName, mainPath);
                 fileSpec[i].wordNumber = countWordFile(mainPath);
                 wordSum = wordSum += fileSpec[i].wordNumber;
                 //printf("\til file: %s ---> ha %ld words\n", fileSpec[i].fileName, fileSpec[i].wordNumber);

@@ -5,4 +5,6 @@ typedef struct {
 	int freq;
 }Word;
 
-int creaStrutturaParole(Word *words, PartitionedWord * w, int count);
+int createWordStruct(Word *words, PartitionedWord * w, int count);
+void wordsCount(Word *w, int length);
+void copyLineInStruct(Word *words, PartitionedWord * w, int count);
