@@ -4,23 +4,26 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <string.h>
-#include <stdbool.h>  
+#include <stdbool.h>
 
 #define MAXFILENAME 50
 
-typedef struct{
+typedef struct
+{
     char fileName[MAXFILENAME];
-    long int wordNumber;
-}FileWordSize;
+    int wordNumber;
+} FileWordSize;
 
-typedef struct{
+typedef struct
+{
     char fileName[MAXFILENAME];
     int rank;
     int start;
     int end;
-}PartitionedWord;
+} PartitionedWord;
 
 long int countWordFile(char *file_name);
 long readFilesAndSum(char *path, FileWordSize *fileSpec);
-void elementSplit(long *wordForProcessor, long sumWords, int proc);
-void wordForProcessor(PartitionedWord *w, long *wordForProcessor, FileWordSize *wordForFile, int proc);
+void elementSplit(int *wordForProcessor, long sumWords, int proc);
+//void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *wordForFile, int proc);
+void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *wordForFile, int proc, int numeroFile);
