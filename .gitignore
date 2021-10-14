@@ -1,3 +1,6 @@
 *.o
 *.out
 .vscode/
+trash/
+*.csv
+*.log
