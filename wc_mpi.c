@@ -30,8 +30,9 @@ void main(int argc, char *argv[])
     
     char *dirFile;
     int wordsForProcessor[size];
-    FileWordSize fileSpec[10];
-    PartitionedWord n_words[FILES_NUMBER];
+    FileWordSize fileSpec[FILES_NUMBER];
+    PartitionedWord n_words[100]; //array di struct delle parole per ogni processo con start e end
+    Word *wds=(Word *) malloc(sizeof(Word));
 
     parse_arg(argc, argv, &dirFile);
 
@@ -75,7 +76,6 @@ void main(int argc, char *argv[])
     MPI_Type_create_struct(2, blockcounts1, offsets1, oldtypes1, &wordtype);
     MPI_Type_commit(&wordtype); 
 
-    Word *wds=(Word *) malloc(sizeof(Word));
 
     if(rank==0)
     {
@@ -94,10 +94,10 @@ void main(int argc, char *argv[])
 
         wordForProcessor(n_words, wordsForProcessor, fileSpec, size, FILES_NUMBER);
 
-        //for(int i = 0; i < FILES_NUMBER; i++)
-        //{
-        //    printf("Proc [%d] - FileName [%s] - Start [%d] - End [%d]\n", n_words[i].rank, n_words[i].fileName, n_words[i].start, n_words[i].end);
-        //}
+        for(int i = 0; i < FILES_NUMBER; i++)
+        {
+            printf("Proc [%d] - FileName [%s] - Start [%d] - End [%d]\n", n_words[i].rank, n_words[i].fileName, n_words[i].start, n_words[i].end);
+        }
 
         int k = 0; //indice di dove mi trovo all'interno della struttura
         int startper0 = 0;
@@ -126,9 +126,9 @@ void main(int argc, char *argv[])
         printf("startper0: %d\n", startper0);
         grandezzaperzero = copyLineInStruct(wds, n_words, startper0);
 
-        wordsCount(wds, grandezzaperzero);
+        //wordsCount(wds, grandezzaperzero);
 
-        writeResultCSV(wds, grandezzaperzero);
+        //writeResultCSV(wds, grandezzaperzero);
 
 
         printf("\n(END) - MASTER(#%d) - (END)\n", rank);

@@ -8,25 +8,24 @@ int copyLineInStruct(Word *words, PartitionedWord *w, int count)
     {
         FILE *file = fopen(w[p].fileName, "r");
         char c[WORDMAXSIZE];
-        int start = w[p].start;
-        int end = w[p].end;
-        //printf("Proc %d || Sto aprendo file: %s || lineaStart: %d || lineaEnd: %d\n", w[p].rank, w[p].fileName, w[p].start, w[p].end);
+        printf("Proc %d || Sto aprendo file: %s || lineaStart: %d || lineaEnd: %d\n", w[p].rank, w[p].fileName, w[p].start, w[p].end);
         while ((fgets(c, sizeof(c), file) != NULL))
         {
             n_line++;
-            if (n_line >= start && n_line <= end)
+            printf("n_line: %d\n", n_line);
+            if (n_line >= w[p].start && n_line <= w[p].end)
             {
                 char *stringaParola = (char *)malloc(sizeof(char));
                 strcpy(stringaParola, c);
                 //rimuovo "\n"
                 strtok(stringaParola, "\n");
                 strcpy(words[p].word, stringaParola);
-                printf("linea: %d || parola: %s\n", n_line, words[p].word);
+                printf("sono dentro\n");
             }
         }
+        printf("linea: %d || parola_words: %s\n", n_line, words[p].word);
         fclose(file);
     }
-    printf("n_line: %d\n", n_line);
     return n_line;
 }
 
@@ -46,7 +45,7 @@ void wordsCount(Word *w, int size)
             {
                 //essendo parole[a].frequenza = 1 è come se facessi +1
                 w[count].freq = w[count].freq + w[i].freq;
-                printf("i: %d - parola: %s || freq: %d\n", i, w[count].word, w[count].freq);
+                //printf("i: %d - parola: %s || freq: %d\n", i, w[count].word, w[count].freq);
             }
         }
     }
