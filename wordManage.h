@@ -4,7 +4,7 @@ typedef struct
 {
 	char word[WORDMAXSIZE];
 	int freq;
-} Word;
+}Word;
 
 int createWordStruct(Word *words, PartitionedWord *w, int count);
 int copyLineInStruct(Word *words, PartitionedWord *w, int count);

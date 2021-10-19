@@ -12,7 +12,6 @@ int copyLineInStruct(Word *words, PartitionedWord *w, int count)
         while ((fgets(c, sizeof(c), file) != NULL))
         {
             n_line++;
-            printf("n_line: %d\n", n_line);
             if (n_line >= w[p].start && n_line <= w[p].end)
             {
                 char *stringaParola = (char *)malloc(sizeof(char));
@@ -20,7 +19,6 @@ int copyLineInStruct(Word *words, PartitionedWord *w, int count)
                 //rimuovo "\n"
                 strtok(stringaParola, "\n");
                 strcpy(words[p].word, stringaParola);
-                printf("sono dentro\n");
             }
         }
         printf("linea: %d || parola_words: %s\n", n_line, words[p].word);
@@ -39,12 +37,12 @@ void wordsCount(Word *w, int size)
         //con il resto della struttura
         for (int i = count + 1; i < size; i++)
         {
-            //se trova la corrispondenza allroa vado ad aumentare la frequenza di tale parola
+            //se trova la corrispondenza allora vado ad aumentare la frequenza di tale parola
             //ovviamente deve continuare a cercare nel caso in cui trova altre parole uguali
             if (strcmp(w[i].word, w[count].word) == 0)
             {
                 //essendo parole[a].frequenza = 1 è come se facessi +1
-                w[count].freq = w[count].freq + w[i].freq;
+                w[count].freq += w[i].freq;
                 //printf("i: %d - parola: %s || freq: %d\n", i, w[count].word, w[count].freq);
             }
         }

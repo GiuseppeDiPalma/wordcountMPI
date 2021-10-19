@@ -7,15 +7,15 @@
 #include "fileManage.h"
 #include "wordManage.h"
 
-#define FILES_NUMBER 4
-
-//// #define TOTALWORDS 400000 // questa variabile dovrebbe essere dinamica
+#define TOTALWORDS 400000 // questa variabile dovrebbe essere dinamica
+#define SPLIT_PROCESSOR 100
 
 void main(int argc, char *argv[])
 {
     int rank, size;
     int tag = 1;
-    
+    int source = 0;
+
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -30,11 +30,15 @@ void main(int argc, char *argv[])
     
     char *dirFile;
     int wordsForProcessor[size];
-    FileWordSize fileSpec[FILES_NUMBER];
-    PartitionedWord n_words[100]; //array di struct delle parole per ogni processo con start e end
+    PartitionedWord n_words[SPLIT_PROCESSOR]; //array di struct delle parole per ogni processo con start e end
+    //Word words[TOTALWORDS]={" ",0}; //cercare di rendere dinamico questo row
+
     Word *wds=(Word *) malloc(sizeof(Word));
 
     parse_arg(argc, argv, &dirFile);
+    int numFiles = countFilesInDirectory(dirFile);
+    FileWordSize fileSpec[numFiles];
+    int sumWord = readFilesAndSum(dirFile, fileSpec);
 
     int count=3;
     MPI_Datatype wordtype, filePerProcType, oldtypes[count], oldtypes1[2];
@@ -74,17 +78,22 @@ void main(int argc, char *argv[])
 
     // create struct with fields
     MPI_Type_create_struct(2, blockcounts1, offsets1, oldtypes1, &wordtype);
-    MPI_Type_commit(&wordtype); 
-
+    MPI_Type_commit(&wordtype);
 
     if(rank==0)
     {
         printf("(START) - MASTER(#%d) - (START)\n", rank);
 
-        int sumWord = readFilesAndSum(dirFile, fileSpec);
+
+
         printf("Total Words [%d]\n", sumWord);
 
         elementSplit(wordsForProcessor, sumWord, size);
+
+        for (int i = 0; i < numFiles; i++)
+        {
+            printf("file name: %s - %d parole totali\n", fileSpec[i].fileName, fileSpec[i].wordNumber);
+        }
 
         for (int i = 0; i < size; i++)
         {
@@ -92,9 +101,9 @@ void main(int argc, char *argv[])
         }
         printf("\n");
 
-        wordForProcessor(n_words, wordsForProcessor, fileSpec, size, FILES_NUMBER);
+        wordForProcessor(n_words, wordsForProcessor, fileSpec, size, numFiles);
 
-        for(int i = 0; i < FILES_NUMBER; i++)
+        for(int i = 0; i < 8; i++)
         {
             printf("Proc [%d] - FileName [%s] - Start [%d] - End [%d]\n", n_words[i].rank, n_words[i].fileName, n_words[i].start, n_words[i].end);
         }
@@ -125,9 +134,20 @@ void main(int argc, char *argv[])
 
         printf("startper0: %d\n", startper0);
         grandezzaperzero = copyLineInStruct(wds, n_words, startper0);
+        
+        wordsCount(wds, grandezzaperzero);
 
-        //wordsCount(wds, grandezzaperzero);
+        int grandezzaprocessi=0;
+        int start2=grandezzaperzero;
+        //int quant=row-start2; // questo row è il il numero di words massimo, ma io l'ho fatto dinamico
 
+        for(int p = 1; p < size; p++)
+		{
+            //MPI_Recv(&wds[start2], quant, wordtype, p, tag, MPI_COMM_WORLD, &stat);
+            //MPI_Get_count(&stat, wordtype, &grandezzaprocessi);
+            //start2=start2+grandezzaprocessi;
+            //quant=row-start2;
+        }
         //writeResultCSV(wds, grandezzaperzero);
 
 
@@ -136,7 +156,13 @@ void main(int argc, char *argv[])
     else
     {
         //printf("(START) - SLAVE(#%d) - (START)\n", rank);
-
+        //int count=0;
+        //int grandezzaStruttura=0;
+        //MPI_Recv(n_words, SPLIT_PROCESSOR , filePerProcType, source, tag, MPI_COMM_WORLD, &stat);
+        //MPI_Get_count(&stat, filePerProcType, &count);
+        //grandezzaStruttura=creaStrutturaParole(wds,n_words,count);
+        //contaOccorrenze(wds,grandezzaStruttura);
+        //MPI_Ssend(wds, grandezzaStruttura, wordtype, 0, tag, MPI_COMM_WORLD); 
         //printf("(END) - SLAVE(#%d) - (END)\n", rank);
     }
 

@@ -120,9 +120,10 @@ void elementSplit(int *wordForProcessor, long sumWords, int proc)
  * @brief 
  * 
  * @param w struttura contentenete informazioni da passare ai processori, il rank, il nome del file da elaborare e da dove iniziare e dove finire.
- * @param wordForProcessor 
- * @param wordForFile 
- * @param proc 
+ * @param wordForProcessor array con il numero di parole che analizza ogni processore
+ * @param wordForFile struttura con path del file e numero di parole di ogni file
+ * @param proc numero di processi per cui si devono creare i campi della struct w
+ * @param numeroFile numero totale dei file
  */
 void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *wordForFile, int proc, int numeroFile)
 {
@@ -130,43 +131,44 @@ void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *w
     int j = 0; //stuttura
     int k = 0; //file
 
-    int surplus = 0;
+    int surplus = 1;
 
     while (i < proc)
     {
         w[j].rank = i;
         w[j].start = surplus;
-        signed int diff = wordForProcessor[i] - wordForFile[k].wordNumber;
-        //printf("wordForProcessor[%d]: %d || wordForFile[%d].wordNumber: %d || diff: %u\n", i, wordForProcessor[i], k, wordForFile[k].wordNumber, diff);
-        if (diff >= 0 && k < numeroFile)
+        int diff = wordForProcessor[i] - wordForFile[k].wordNumber;
+        //printf("w[%d].rank: %d || w[%d].start: %d ||diff: %d\n", j, i, j, surplus, diff);
+        if (diff >= 0) 
         {
+            printf("1= per processo %d deve analizzare %d", i, wordForProcessor[i]);
+
             wordForProcessor[i] = wordForProcessor[i] - wordForFile[k].wordNumber;
-            w[j].end = wordForFile[k].wordNumber + surplus;
+            w[j].end = wordForFile[k].wordNumber;
             strcpy(w[j].fileName, wordForFile[k].fileName);
-            surplus = 0;
+
+            printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
+
+            surplus = 1;
             j++;
             k++;
+            
+            if(wordForProcessor[i] == 0)
+                i++;
         }
         else
         {
-            //printf("ELSEwordForProcessor[%d]: %d || wordForFile[%d].wordNumber: %d || diff: %u\n", i, wordForProcessor[i], k, wordForFile[k].wordNumber, diff);
+            printf("1x= per processo %d deve analizzare %d", i, wordForProcessor[i]);
 
-            signed int diff_2 = wordForFile[k].wordNumber - wordForProcessor[i];
-            if (diff_2 < 0)
-            {
-                w[j].end = wordForFile[k].wordNumber;
-            }
-            else
-            {
-                wordForFile[k].wordNumber = wordForFile[k].wordNumber - wordForProcessor[i];
-                surplus = wordForProcessor[i] + 1;
-                w[j].end = wordForProcessor[i];
-                wordForProcessor[i] = 0;
-            }
+            wordForFile[k].wordNumber = wordForFile[k].wordNumber - wordForProcessor[i];
+            w[j].end = wordForProcessor[i] + surplus;
+            surplus = w[j].end;
+            printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", wordForFile[k].fileName, w[j].start, w[j].end, wordForProcessor[i]);
+            wordForProcessor[i] = 0;
             strcpy(w[j].fileName, wordForFile[k].fileName);
+
             i++;
             j++;
-            w[j].start = surplus;
         }
     }
 }

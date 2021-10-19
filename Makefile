@@ -14,4 +14,4 @@ wc_mpi.o: wc_mpi.c fileManage.o utils.o wordManage.o
 	mpicc -c wc_mpi.c
 
 clean:
-	rm *.o *.out
+	rm *.o *.out *.log

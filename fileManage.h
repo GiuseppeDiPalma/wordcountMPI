@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdbool.h>
+#include <dirent.h>
 
 #define MAXFILENAME 50
 
@@ -12,7 +13,7 @@ typedef struct
 {
     char fileName[MAXFILENAME];
     int wordNumber;
-} FileWordSize;
+}FileWordSize;
 
 typedef struct
 {
@@ -20,7 +21,7 @@ typedef struct
     int rank;
     int start;
     int end;
-} PartitionedWord;
+}PartitionedWord;
 
 long int countWordFile(char *file_name);
 long readFilesAndSum(char *path, FileWordSize *fileSpec);

@@ -33,3 +33,29 @@ void parse_arg(int argc, char **argv, char **path)
 	if (*path == NULL)
 		usage();
 }
+
+int countFilesInDirectory(char *path)
+{
+    DIR *dir;
+    struct dirent *d;
+
+    int count = 0;
+
+    if ((dir = opendir(path)) != NULL)
+    {
+        while ((d = readdir(dir)) != NULL)
+        {
+            if (strcmp(d->d_name, "..") != 0 && strcmp(d->d_name, ".") != 0)
+            {
+                count++;
+            }
+        }
+        closedir(dir);
+    }
+    else
+    {
+        perror("Could not open directory!");
+        exit(0);
+    }
+    return count;
+}
