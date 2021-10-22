@@ -12,6 +12,9 @@ int copyLineInStruct(Word *words, PartitionedWord *w, int count)
 {
     int n_line = 0;
     int lineCounter = 0;
+
+    int j = 0; //struct words
+
     for (int p = 0; p < count; p++)
     {
         FILE *file = fopen(w[p].fileName, "r");
@@ -25,11 +28,14 @@ int copyLineInStruct(Word *words, PartitionedWord *w, int count)
                 char *stringaParola = (char *)malloc(sizeof(char));
                 strcpy(stringaParola, c);
                 strtok(stringaParola, "\n"); //rimuovo "\n"
-                strcpy(words[p].word, stringaParola);
+                //strcpy(words[p].word, stringaParola);
+                strcpy(words[j].word, stringaParola);
+                words[j].freq = 1;
                 free(stringaParola);
-                printf("line: %d || word[%d]: %s\n", n_line, p, words[p].word);
+                //printf("line: %d || word[%d]: %s\n", n_line, j, words[j].word);
                 lineCounter++;
             }
+            j++;
         }
         n_line = 0;
         fclose(file);
@@ -55,36 +61,43 @@ void wordsCount(Word *w, int size)
         {
             //se trova la corrispondenza allora vado ad aumentare la frequenza di tale parola
             //ovviamente deve continuare a cercare nel caso in cui trova altre parole uguali
+            //printf("Confronto: w[%d].word: %s --> w[%d].word: %s\n", i, w[i].word, count, w[count].word);
             if (strcmp(w[i].word, w[count].word) == 0)
             {
                 //essendo parole[a].frequenza = 1 è come se facessi +1
                 w[count].freq += w[i].freq;
                 //printf("w[%d].word: %s || w[%d].word: %s || w[count].freq: %d\n", i, w[i].word, count, w[count].word, w[count].freq);
-                printf("i: %d - parola: %s || freq: %d\n", i, w[count].word, w[count].freq);
+                //printf("i: %d - parola: %s || freq: %d\n", i, w[count].word, w[count].freq);
             }
         }
     }
 }
 
+/**
+ * @brief 
+ * 
+ * @param w 
+ * @param size 
+ */
 void writeResultCSV(Word *w, int size)
 {
     FILE *csv;
-    int n = 0;
 
     csv = fopen("results.csv", "w+");
-    fprintf(csv, "Word:Count");
-    for (n = 0; n < size; n++)
+    fprintf(csv, "Word,Count\n");
+    for (int n = 0; n < size; n++)
     {
         for (int a = n + 1; a < size; a++)
         {
-            if (strcmp(w[n].word, w[a].word) == 0)
+            if (strcmp(w[a].word, w[n].word) == 0)
             {
+                printf("w[%d].freq: %d || w[%d].freq: %d\n", a, w[a].freq, n, w[n].freq);
                 w[a].freq = w[n].freq + w[a].freq;
             }
         }
         if (strcmp(w[n].word, "") != 0)
         {
-            fprintf(csv, "\n%s,%d\n", w[n].word, w[n].freq);
+            fprintf(csv, "%s,%d\n", w[n].word, w[n].freq);
         }
     }
 }

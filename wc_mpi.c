@@ -135,7 +135,6 @@ void main(int argc, char *argv[])
 
         
         printf("sizeOfZero: %d \n", sizeOfZero);
-        printf("parola4: %s|| linea: \n",  wds[4].word);
         wordsCount(wds, sizeOfZero);
 
         int sizeForProcessor=0;

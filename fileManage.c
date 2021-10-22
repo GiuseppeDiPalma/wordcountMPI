@@ -86,10 +86,7 @@ long readFilesAndSum(char *path, FileWordSize *fileSpec)
  */
 void elementSplit(int *wordForProcessor, long sumWords, int proc)
 {
-
     int mod = sumWords % proc;
-    //printf("sumWords: %ld || proc: %d || MOD: %ld\n", sumWords, proc, mod);
-
     if (mod == 0)
     {
         for (int i = 0; i < proc; i++)
@@ -105,13 +102,11 @@ void elementSplit(int *wordForProcessor, long sumWords, int proc)
         }
 
         int j = 0;
-
         while (mod != 0)
         {
             int module2 = j % proc;
             wordForProcessor[module2] = wordForProcessor[module2] + 1;
-            mod--;
-            j++;
+            mod--; j++;
         }
     }
 }
@@ -142,35 +137,25 @@ void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *f
         if (diff >= 0) 
         {
             //printf("processo %d deve analizzare %d", i, wordForProcessor[i]);
-
             wordForProcessor[i] = wordForProcessor[i] - fileInfo[k].wordNumber + offset;
             w[j].end = fileInfo[k].wordNumber;
             strcpy(w[j].fileName, fileInfo[k].fileName);
-
             //printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
-
             offset = 0;
-            j++;
-            k++;
-            
+            j++; k++;
             if(wordForProcessor[i] == 0)
                 i++;
         }
         else
         {
             //printf("processo %d deve analizzare %d", i, wordForProcessor[i]);
-
             // fileInfo[k].wordNumber = fileInfo[k].wordNumber - wordForProcessor[i];
             w[j].end = wordForProcessor[i] + offset - 1;
             offset = w[j].end + 1;
             wordForProcessor[i] = 0;
-
             //printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", fileInfo[k].fileName, w[j].start, w[j].end, wordForProcessor[i]);
-            
             strcpy(w[j].fileName, fileInfo[k].fileName);
-
-            i++;
-            j++;
+            i++; j++;
         }
     }
 }
