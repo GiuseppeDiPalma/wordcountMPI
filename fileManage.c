@@ -117,39 +117,39 @@ void elementSplit(int *wordForProcessor, long sumWords, int proc)
 }
 
 /**
- * @brief 
+ * @brief Questa funzione deve riempire la struttura da inviare ad ogni processore per la computazione.
+ *        La struttura deve contenere i campi RANK, FILE_NAME, START, END, che poi saranno passati al processore.
  * 
- * @param w struttura contentenete informazioni da passare ai processori, il rank, il nome del file da elaborare e da dove iniziare e dove finire.
- * @param wordForProcessor array con il numero di parole che analizza ogni processore
- * @param wordForFile struttura con path del file e numero di parole di ogni file
- * @param proc numero di processi per cui si devono creare i campi della struct w
- * @param numeroFile numero totale dei file
+ * @param w Struttura che sarà riempita e inviata ai processi
+ * @param wordForProcessor Array di numeri che contiene in ogni i-esima posizione il numero di parole che l'i-esimo processore deve analizzare
+ * @param fileInfo Struttura che contiene le info di un file, path del file e il numero di parole contenuto in esso.
+ * @param proc Numero di processori che effettuano la computazione
  */
-void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *wordForFile, int proc, int numeroFile)
+void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fileInfo, int proc, int numeroFile)
 {
     int i = 0; //processi
     int j = 0; //stuttura
     int k = 0; //file
 
-    int surplus = 1;
+    int offset = 0;
 
     while (i < proc)
     {
         w[j].rank = i;
-        w[j].start = surplus;
-        int diff = wordForProcessor[i] - wordForFile[k].wordNumber;
-        //printf("w[%d].rank: %d || w[%d].start: %d ||diff: %d\n", j, i, j, surplus, diff);
+        w[j].start = offset;
+        int diff = wordForProcessor[i] - fileInfo[k].wordNumber;
+        //printf("w[%d].rank: %d || w[%d].start: %d ||diff: %d\n", j, i, j, offset, diff);
         if (diff >= 0) 
         {
-            printf("1= per processo %d deve analizzare %d", i, wordForProcessor[i]);
+            //printf("processo %d deve analizzare %d", i, wordForProcessor[i]);
 
-            wordForProcessor[i] = wordForProcessor[i] - wordForFile[k].wordNumber;
-            w[j].end = wordForFile[k].wordNumber;
-            strcpy(w[j].fileName, wordForFile[k].fileName);
+            wordForProcessor[i] = wordForProcessor[i] - fileInfo[k].wordNumber + offset;
+            w[j].end = fileInfo[k].wordNumber;
+            strcpy(w[j].fileName, fileInfo[k].fileName);
 
-            printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
+            //printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
 
-            surplus = 1;
+            offset = 0;
             j++;
             k++;
             
@@ -158,14 +158,16 @@ void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *w
         }
         else
         {
-            printf("1x= per processo %d deve analizzare %d", i, wordForProcessor[i]);
+            //printf("processo %d deve analizzare %d", i, wordForProcessor[i]);
 
-            wordForFile[k].wordNumber = wordForFile[k].wordNumber - wordForProcessor[i];
-            w[j].end = wordForProcessor[i] + surplus;
-            surplus = w[j].end;
-            printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", wordForFile[k].fileName, w[j].start, w[j].end, wordForProcessor[i]);
+            // fileInfo[k].wordNumber = fileInfo[k].wordNumber - wordForProcessor[i];
+            w[j].end = wordForProcessor[i] + offset - 1;
+            offset = w[j].end + 1;
             wordForProcessor[i] = 0;
-            strcpy(w[j].fileName, wordForFile[k].fileName);
+
+            //printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", fileInfo[k].fileName, w[j].start, w[j].end, wordForProcessor[i]);
+            
+            strcpy(w[j].fileName, fileInfo[k].fileName);
 
             i++;
             j++;

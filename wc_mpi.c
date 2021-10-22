@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <mpi.h>
+#include <stddef.h>
 
 #include "utils.h"
 #include "fileManage.h"
@@ -31,9 +32,7 @@ void main(int argc, char *argv[])
     char *dirFile;
     int wordsForProcessor[size];
     PartitionedWord n_words[SPLIT_PROCESSOR]; //array di struct delle parole per ogni processo con start e end
-    //Word words[TOTALWORDS]={" ",0}; //cercare di rendere dinamico questo row
-
-    Word *wds=(Word *) malloc(sizeof(Word));
+    Word *wds=(Word *) malloc(sizeof(Word) * TOTALWORDS);
 
     parse_arg(argc, argv, &dirFile);
     int numFiles = countFilesInDirectory(dirFile);
@@ -84,8 +83,6 @@ void main(int argc, char *argv[])
     {
         printf("(START) - MASTER(#%d) - (START)\n", rank);
 
-
-
         printf("Total Words [%d]\n", sumWord);
 
         elementSplit(wordsForProcessor, sumWord, size);
@@ -101,25 +98,26 @@ void main(int argc, char *argv[])
         }
         printf("\n");
 
-        wordForProcessor(n_words, wordsForProcessor, fileSpec, size, numFiles);
+        wordForProcessor(n_words, wordsForProcessor, fileSpec, size, numFiles); 
 
         for(int i = 0; i < 8; i++)
         {
             printf("Proc [%d] - FileName [%s] - Start [%d] - End [%d]\n", n_words[i].rank, n_words[i].fileName, n_words[i].start, n_words[i].end);
         }
 
+
         int k = 0; //indice di dove mi trovo all'interno della struttura
-        int startper0 = 0;
-        int grandezzaperzero = 0;
+        int startForZero = 0;
+        int sizeOfZero = 0;
         
         //celle da passare a processo 1...
         while(n_words[k].rank==0)
         {
             k++;
-            startper0++;
+            startForZero++;
         }
         
-        int q = startper0; //da dove devo partire
+        int q = startForZero; //da dove devo partire
         for (int i=1 ; i < size; i++)
         {
             int j=0; //quanti elementi
@@ -132,38 +130,41 @@ void main(int argc, char *argv[])
             q=k;
         }
 
-        printf("startper0: %d\n", startper0);
-        grandezzaperzero = copyLineInStruct(wds, n_words, startper0);
-        
-        wordsCount(wds, grandezzaperzero);
+        printf("startForZero: %d\n", startForZero);
+        sizeOfZero = copyLineInStruct(wds, n_words, startForZero);
 
-        int grandezzaprocessi=0;
-        int start2=grandezzaperzero;
-        //int quant=row-start2; // questo row è il il numero di words massimo, ma io l'ho fatto dinamico
+        
+        printf("sizeOfZero: %d \n", sizeOfZero);
+        printf("parola4: %s|| linea: \n",  wds[4].word);
+        wordsCount(wds, sizeOfZero);
+
+        int sizeForProcessor=0;
+        int start2=sizeOfZero;
+        int quant=TOTALWORDS-start2;
 
         for(int p = 1; p < size; p++)
 		{
             //MPI_Recv(&wds[start2], quant, wordtype, p, tag, MPI_COMM_WORLD, &stat);
-            //MPI_Get_count(&stat, wordtype, &grandezzaprocessi);
-            //start2=start2+grandezzaprocessi;
-            //quant=row-start2;
+            //MPI_Get_count(&stat, wordtype, &sizeForProcessor);
+            //start2=start2+sizeForProcessor;
+            //quant=TOTALWORDS-start2;
         }
-        //writeResultCSV(wds, grandezzaperzero);
+        writeResultCSV(wds, sizeOfZero);
 
 
         printf("\n(END) - MASTER(#%d) - (END)\n", rank);
     }
     else
     {
-        //printf("(START) - SLAVE(#%d) - (START)\n", rank);
+        printf("(START) - SLAVE(#%d) - (START)\n", rank);
         //int count=0;
         //int grandezzaStruttura=0;
         //MPI_Recv(n_words, SPLIT_PROCESSOR , filePerProcType, source, tag, MPI_COMM_WORLD, &stat);
         //MPI_Get_count(&stat, filePerProcType, &count);
-        //grandezzaStruttura=creaStrutturaParole(wds,n_words,count);
-        //contaOccorrenze(wds,grandezzaStruttura);
+        //grandezzaStruttura=copyLineInStruct(wds,n_words,count);
+        //wordsCount(wds,grandezzaStruttura);
         //MPI_Ssend(wds, grandezzaStruttura, wordtype, 0, tag, MPI_COMM_WORLD); 
-        //printf("(END) - SLAVE(#%d) - (END)\n", rank);
+        printf("(END) - SLAVE(#%d) - (END)\n", rank);
     }
 
     printf("(END) - MPI WORD COUNT - (END)\n\n");
