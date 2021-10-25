@@ -74,10 +74,10 @@ void wordsCount(Word *w, int size)
 }
 
 /**
- * @brief 
+ * @brief Counts word occurrences and writes them into the csv file
  * 
- * @param w 
- * @param size 
+ * @param w struct with word and occurrences
+ * @param size number of word to write
  */
 void writeResultCSV(Word *w, int size)
 {
@@ -85,14 +85,14 @@ void writeResultCSV(Word *w, int size)
 
     csv = fopen("results.csv", "w+");
     fprintf(csv, "Word,Count\n");
+
     for (int n = 0; n < size; n++)
     {
         for (int a = n + 1; a < size; a++)
         {
-            if (strcmp(w[a].word, w[n].word) == 0)
+            if (strcmp(w[n].word, w[a].word) == 0)
             {
-                printf("w[%d].freq: %d || w[%d].freq: %d\n", a, w[a].freq, n, w[n].freq);
-                w[a].freq = w[n].freq + w[a].freq;
+                w[a].freq += w[n].freq;
             }
         }
         if (strcmp(w[n].word, "") != 0)

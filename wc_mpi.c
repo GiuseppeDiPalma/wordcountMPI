@@ -17,6 +17,9 @@ void main(int argc, char *argv[])
     int tag = 1;
     int source = 0;
 
+    char *dirFile;
+    int wordsForProcessor[size];
+
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -27,21 +30,21 @@ void main(int argc, char *argv[])
     //Parameters for time MPI
     double start = MPI_Wtime();
 
-    printf("(START) - MPI WORD COUNT - (START)\n\n");
-    
-    char *dirFile;
-    int wordsForProcessor[size];
-    PartitionedWord n_words[SPLIT_PROCESSOR]; //array di struct delle parole per ogni processo con start e end
-    Word *wds=(Word *) malloc(sizeof(Word) * TOTALWORDS);
+    printf("(START) - MPI WORD COUNT - (START)\n");
+
+    PartitionedWord *n_words = (PartitionedWord *) malloc(sizeof(PartitionedWord) * SPLIT_PROCESSOR);
+    Word *wds = (Word *) malloc(sizeof(Word) * TOTALWORDS);
 
     parse_arg(argc, argv, &dirFile);
     int numFiles = countFilesInDirectory(dirFile);
     FileWordSize fileSpec[numFiles];
     int sumWord = readFilesAndSum(dirFile, fileSpec);
 
+// ! DA QUI
     int count=3;
-    MPI_Datatype wordtype, filePerProcType, oldtypes[count], oldtypes1[2];
     int blockcounts[count], blockcounts1[2];
+
+    MPI_Datatype wordtype, filePerProcType, oldtypes[count], oldtypes1[2];
     MPI_Aint offsets[count], offsets1[2], lb, extent;
 
     offsets[0] = offsetof(PartitionedWord, rank);
@@ -50,14 +53,14 @@ void main(int argc, char *argv[])
     MPI_Type_get_extent(MPI_INT, &lb, &extent);
 
     offsets[1] = offsetof(PartitionedWord, start);
-    oldtypes[1] = MPI_LONG;
-    blockcounts[1] = 2;
-    MPI_Type_get_extent(MPI_LONG, &lb, &extent);
+    oldtypes[1] = MPI_INT;
+    blockcounts[1] = 1;
+    MPI_Type_get_extent(MPI_INT, &lb, &extent);
 
     offsets[2] = offsetof(PartitionedWord, fileName);
     oldtypes[2] = MPI_CHAR;
-    blockcounts[2] = 16;
-    MPI_Type_get_extent(MPI_CHAR,&lb,&extent);
+    blockcounts[2] = MAXFILENAME;
+    MPI_Type_get_extent(MPI_CHAR, &lb, &extent);
 
     //create type struct
     MPI_Type_create_struct(count, blockcounts, offsets, oldtypes, &filePerProcType);
@@ -78,6 +81,7 @@ void main(int argc, char *argv[])
     // create struct with fields
     MPI_Type_create_struct(2, blockcounts1, offsets1, oldtypes1, &wordtype);
     MPI_Type_commit(&wordtype);
+// ! A QUI
 
     if(rank==0)
     {
@@ -87,24 +91,13 @@ void main(int argc, char *argv[])
 
         elementSplit(wordsForProcessor, sumWord, size);
 
+        printf("Ogni processore analizza al più : %d parole\n", wordsForProcessor[0]);
         for (int i = 0; i < numFiles; i++)
         {
             printf("file name: %s - %d parole totali\n", fileSpec[i].fileName, fileSpec[i].wordNumber);
         }
 
-        for (int i = 0; i < size; i++)
-        {
-            printf("proc [%d] - processa [%d] parole\n", i, wordsForProcessor[i]);
-        }
-        printf("\n");
-
         wordForProcessor(n_words, wordsForProcessor, fileSpec, size, numFiles); 
-
-        for(int i = 0; i < 8; i++)
-        {
-            printf("Proc [%d] - FileName [%s] - Start [%d] - End [%d]\n", n_words[i].rank, n_words[i].fileName, n_words[i].start, n_words[i].end);
-        }
-
 
         int k = 0; //indice di dove mi trovo all'interno della struttura
         int startForZero = 0;
@@ -130,11 +123,7 @@ void main(int argc, char *argv[])
             q=k;
         }
 
-        printf("startForZero: %d\n", startForZero);
         sizeOfZero = copyLineInStruct(wds, n_words, startForZero);
-
-        
-        printf("sizeOfZero: %d \n", sizeOfZero);
         wordsCount(wds, sizeOfZero);
 
         int sizeForProcessor=0;
@@ -143,12 +132,13 @@ void main(int argc, char *argv[])
 
         for(int p = 1; p < size; p++)
 		{
-            //MPI_Recv(&wds[start2], quant, wordtype, p, tag, MPI_COMM_WORLD, &stat);
-            //MPI_Get_count(&stat, wordtype, &sizeForProcessor);
-            //start2=start2+sizeForProcessor;
-            //quant=TOTALWORDS-start2;
+            MPI_Recv(&wds[start2], quant, wordtype, p, tag, MPI_COMM_WORLD, &stat);
+            MPI_Get_count(&stat, wordtype, &sizeForProcessor);
+            start2=start2+sizeForProcessor;
+            quant=TOTALWORDS-start2;
         }
-        writeResultCSV(wds, sizeOfZero);
+        printf("start2: %d", start2);
+        writeResultCSV(wds, start2);
 
 
         printf("\n(END) - MASTER(#%d) - (END)\n", rank);
@@ -156,13 +146,13 @@ void main(int argc, char *argv[])
     else
     {
         printf("(START) - SLAVE(#%d) - (START)\n", rank);
-        //int count=0;
-        //int grandezzaStruttura=0;
-        //MPI_Recv(n_words, SPLIT_PROCESSOR , filePerProcType, source, tag, MPI_COMM_WORLD, &stat);
-        //MPI_Get_count(&stat, filePerProcType, &count);
-        //grandezzaStruttura=copyLineInStruct(wds,n_words,count);
-        //wordsCount(wds,grandezzaStruttura);
-        //MPI_Ssend(wds, grandezzaStruttura, wordtype, 0, tag, MPI_COMM_WORLD); 
+        int count=0;
+        int structSize=0;
+        MPI_Recv(n_words, SPLIT_PROCESSOR, filePerProcType, source, tag, MPI_COMM_WORLD, &stat);
+        MPI_Get_count(&stat, filePerProcType, &count);
+        structSize=copyLineInStruct(wds,n_words,count);
+        wordsCount(wds, structSize);
+        MPI_Ssend(wds, structSize, wordtype, 0, tag, MPI_COMM_WORLD); 
         printf("(END) - SLAVE(#%d) - (END)\n", rank);
     }
 
