@@ -99,14 +99,14 @@ void main(int argc, char *argv[])
 
         wordForProcessor(n_words, wordsForProcessor, fileSpec, size, numFiles); 
 
-        int k = 0; //indice di dove mi trovo all'interno della struttura
+        int iStruct = 0; //indice di dove mi trovo all'interno della struttura
         int startForZero = 0;
         int sizeOfZero = 0;
         
         //celle da passare a processo 1...
-        while(n_words[k].rank==0)
+        while(n_words[iStruct].rank==0)
         {
-            k++;
+            iStruct++;
             startForZero++;
         }
         
@@ -114,13 +114,13 @@ void main(int argc, char *argv[])
         for (int i=1 ; i < size; i++)
         {
             int j=0; //quanti elementi
-            while(n_words[k].rank == i)
+            while(n_words[iStruct].rank == i)
             {
-                k++;
+                iStruct++;
                 j++;
             }
             MPI_Send(&n_words[q], j, filePerProcType, i, tag, MPI_COMM_WORLD);
-            q=k;
+            q=iStruct;
         }
 
         sizeOfZero = copyLineInStruct(wds, n_words, startForZero);
