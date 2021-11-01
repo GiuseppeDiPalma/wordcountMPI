@@ -120,7 +120,7 @@ void elementSplit(int *wordForProcessor, long sumWords, int proc)
  * @param fileInfo Struttura che contiene le info di un file, path del file e il numero di parole contenuto in esso.
  * @param proc Numero di processori che effettuano la computazione
  */
-void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fileInfo, int proc, int numeroFile)
+int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fileInfo, int proc, int numeroFile)
 {
     int i = 0; //processi
     int j = 0; //stuttura
@@ -132,13 +132,13 @@ void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *f
     {
         w[j].rank = i;
         w[j].start = offset;
-        int diff = wordForProcessor[i] - fileInfo[k].wordNumber;
+        int diff = wordForProcessor[i] - (fileInfo[k].wordNumber - offset);
         //printf("w[%d].rank: %d || w[%d].start: %d ||diff: %d\n", j, i, j, offset, diff);
         if (diff >= 0) 
         {
             //printf("processo %d deve analizzare %d", i, wordForProcessor[i]);
             wordForProcessor[i] = wordForProcessor[i] - fileInfo[k].wordNumber + offset;
-            w[j].end = fileInfo[k].wordNumber;
+            w[j].end = fileInfo[k].wordNumber - 1;
             strcpy(w[j].fileName, fileInfo[k].fileName);
             //printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
             offset = 0;
@@ -155,7 +155,15 @@ void wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *f
             wordForProcessor[i] = 0;
             //printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", fileInfo[k].fileName, w[j].start, w[j].end, wordForProcessor[i]);
             strcpy(w[j].fileName, fileInfo[k].fileName);
-            i++; j++;
+            i++; 
+            j++;
         }
     }
+
+    return j;
+}
+
+void preProcessingFile(char *path)
+{
+    
 }

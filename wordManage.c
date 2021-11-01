@@ -19,7 +19,7 @@ int copyLineInStruct(Word *words, PartitionedWord *w, int count)
     {
         FILE *file = fopen(w[p].fileName, "r");
         char c[WORDMAXSIZE];
-        printf("Proc %d || filename: %s || lineaStart: %d || lineaEnd: %d\n", w[p].rank, w[p].fileName, w[p].start, w[p].end);
+        // printf("Proc %d || filename: %s || lineaStart: %d || lineaEnd: %d\n", w[p].rank, w[p].fileName, w[p].start, w[p].end);
         while ((fgets(c, sizeof(c), file) != NULL))
         {
             n_line++;
