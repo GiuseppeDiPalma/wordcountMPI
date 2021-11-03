@@ -26,6 +26,6 @@ typedef struct
 long int countWordFile(char *file_name);
 long readFilesAndSum(char *path, FileWordSize *fileSpec);
 void elementSplit(int *wordForProcessor, long sumWords, int proc);
-int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *wordForFile, int proc, int numeroFile);
+int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *wordForFile, int proc);
 
 void preProcessingFile(char *path);

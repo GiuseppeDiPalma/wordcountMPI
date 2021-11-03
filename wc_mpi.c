@@ -106,7 +106,7 @@ void main(int argc, char *argv[])
             printf("file name: %s - %d parole totali\n", fileSpec[i].fileName, fileSpec[i].wordNumber);
         }
 
-        int num_splits = wordForProcessor(n_words, wordsForProcessor, fileSpec, size, numFiles);
+        int num_splits = wordForProcessor(n_words, wordsForProcessor, fileSpec, size);
 
         for (int i = 0; i < num_splits; i++)
         {
@@ -157,7 +157,7 @@ void main(int argc, char *argv[])
             start2 = start2 + sizeForProcessor;
             quant = TOTALWORDS - start2;
         }
-        printf("start2: %d", start2);
+        printf("start2: %d\n", start2);
         writeResultCSV(wds, start2);
 
         // printf("\n(END) - MASTER(#%d) - (END)\n", rank);

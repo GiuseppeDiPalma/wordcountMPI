@@ -119,8 +119,10 @@ void elementSplit(int *wordForProcessor, long sumWords, int proc)
  * @param wordForProcessor Array di numeri che contiene in ogni i-esima posizione il numero di parole che l'i-esimo processore deve analizzare
  * @param fileInfo Struttura che contiene le info di un file, path del file e il numero di parole contenuto in esso.
  * @param proc Numero di processori che effettuano la computazione
+ * 
+ * @return number of total split
  */
-int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fileInfo, int proc, int numeroFile)
+int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fileInfo, int proc)
 {
     int i = 0; //processi
     int j = 0; //stuttura
@@ -161,9 +163,4 @@ int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fi
     }
 
     return j;
-}
-
-void preProcessingFile(char *path)
-{
-    
 }
