@@ -1,6 +1,6 @@
 #include "fileManage.h"
 
-long int countWordFile(char *file_name)
+int countWordFile(char *file_name)
 {
     char ch;
     int word_count = 1;
@@ -41,7 +41,7 @@ long int countWordFile(char *file_name)
  * @param fileSpec struct with file specification
  * @return long sum of all words in all file
  */
-long readFilesAndSum(char *path, FileWordSize *fileSpec)
+int readFilesAndSum(char *path, FileWordSize *fileSpec)
 {
     DIR *dir;
     struct dirent *d;
