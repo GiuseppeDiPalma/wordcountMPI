@@ -46,6 +46,9 @@ int readFilesAndSum(char *path, FileWordSize *fileSpec)
     DIR *dir;
     struct dirent *d;
 
+    // Pront path
+    printf("%s\n", path);
+
     long int wordSum = 0;
     int i = 0;
 
@@ -55,7 +58,7 @@ int readFilesAndSum(char *path, FileWordSize *fileSpec)
         {
             if (strcmp(d->d_name, "..") != 0 && strcmp(d->d_name, ".") != 0)
             {
-                char *mainPath = (char *)malloc(sizeof(char));
+                char *mainPath = (char *)malloc(sizeof(char) * 256);
                 strcpy(mainPath, path);
                 strcat(mainPath, d->d_name);
                 strcpy(fileSpec[i].fileName, mainPath);
