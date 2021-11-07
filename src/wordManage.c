@@ -1,19 +1,15 @@
 #include "fileManage.h"
 #include "wordManage.h"
 
-#define TOTALWORDS 4000000 // questa variabile dovrebbe essere dinamica
-
-// Find the index of a word into an array of words
+/**
+ * @brief Find the index of a word into an array of words
+ */
 int findWord(Word *w, char *word, int n_line)
 {
     int i = 0;
     for (i = 0; i < n_line; i++)
-    {
         if (strcmp(w[i].word, word) == 0)
-        {
             return i;
-        }
-    }
     return -1;
 }
 
@@ -26,7 +22,7 @@ int findWord(Word *w, char *word, int n_line)
  * 
  * @return int number of line for specific processor
  */
-int word_count(Word *w, PartitionedWord *wordSplit, int count)
+int wordCount(Word *w, PartitionedWord *wordSplit, int count)
 {
     int n_line = 0;
     int word_vector_size = 0;
@@ -42,7 +38,7 @@ int word_count(Word *w, PartitionedWord *wordSplit, int count)
             n_line++;
             if (n_line >= wordSplit[p].start && n_line <= wordSplit[p].end)
             {
-                strtok(c, "\n"); //rimuovo "\n"
+                strtok(c, "\n"); //remove "\n"
                 if ((index_word = findWord(w, c, TOTALWORDS)) == -1)
                 {
                     strcpy(w[word_vector_size].word, c);
@@ -60,18 +56,44 @@ int word_count(Word *w, PartitionedWord *wordSplit, int count)
     return word_vector_size;
 }
 
+/**
+ * @brief Merge words with received words
+ */
+int mergeWords(Word *words, Word *words_received, int sizeForProcessor, int sizeOfZero)
+{
+    int j;
+
+    for (int i = 0; i < sizeForProcessor; i++)
+    {
+        for (j = 0; j < sizeOfZero; j++)
+        {
+            if (strcmp(words_received[i].word, words[j].word) == 0)
+            {
+                words[j].freq += words_received[i].freq;
+                break;
+            }
+        }
+        if (j == sizeOfZero) // La parola non c'è
+        {
+            strcpy(words[j].word, words_received[i].word);
+            words[j].freq = words_received[i].freq;
+            sizeOfZero++;
+        }
+    }
+    return sizeOfZero;
+}
 
 /**
  * @brief Counts word occurrences and writes them into the csv file
  * 
  * @param w struct with word and occurrences
- * @param size number of word to write
+ * @param size number of words to write
  */
 void writeResultCSV(Word *w, int size)
 {
     FILE *csv;
 
-    csv = fopen("results.csv", "w+");
+    csv = fopen("../results.csv", "w+");
 
     fprintf(csv, "word,frequency\n");
     for (int n = 0; n < size; n++)

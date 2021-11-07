@@ -1,5 +1,9 @@
 #include "fileManage.h"
-
+/**
+ * @brief 
+ * 
+ * @return int total number of worlds in file
+ */
 int countWordFile(char *file_name)
 {
     char ch;
@@ -35,21 +39,18 @@ int countWordFile(char *file_name)
 
 /**
  * @brief read all file in a directory, fill a struct with fileName e number of words
- * for any file, after this return sum of all words in all file.
+ * for any file, after this return sum of total words in all file.
  * 
  * @param path target directory path
  * @param fileSpec struct with file specification
- * @return long sum of all words in all file
+ * @return int sum of all words in all file
  */
 int readFilesAndSum(char *path, FileWordSize *fileSpec)
 {
     DIR *dir;
     struct dirent *d;
 
-    // Pront path
-    printf("%s\n", path);
-
-    long int wordSum = 0;
+    int wordSum = 0;
     int i = 0;
 
     if ((dir = opendir(path)) != NULL)
@@ -64,7 +65,6 @@ int readFilesAndSum(char *path, FileWordSize *fileSpec)
                 strcpy(fileSpec[i].fileName, mainPath);
                 fileSpec[i].wordNumber = countWordFile(mainPath);
                 wordSum = wordSum += fileSpec[i].wordNumber;
-                //printf("\til file: %s ---> ha %ld words\n", fileSpec[i].fileName, fileSpec[i].wordNumber);
                 i++;
             }
         }
@@ -138,14 +138,11 @@ int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fi
         w[j].rank = i;
         w[j].start = offset;
         int diff = wordForProcessor[i] - (fileInfo[k].wordNumber - offset);
-        //printf("w[%d].rank: %d || w[%d].start: %d ||diff: %d\n", j, i, j, offset, diff);
         if (diff >= 0) 
         {
-            //printf("processo %d deve analizzare %d", i, wordForProcessor[i]);
             wordForProcessor[i] = wordForProcessor[i] - fileInfo[k].wordNumber + offset;
             w[j].end = fileInfo[k].wordNumber - 1;
             strcpy(w[j].fileName, fileInfo[k].fileName);
-            //printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", w[j].fileName, w[j].start, w[j].end, wordForProcessor[i]);
             offset = 0;
             j++; k++;
             if(wordForProcessor[i] == 0)
@@ -153,12 +150,9 @@ int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fi
         }
         else
         {
-            //printf("processo %d deve analizzare %d", i, wordForProcessor[i]);
-            // fileInfo[k].wordNumber = fileInfo[k].wordNumber - wordForProcessor[i];
             w[j].end = wordForProcessor[i] + offset - 1;
             offset = w[j].end + 1;
             wordForProcessor[i] = 0;
-            //printf(", con file %s, parto da %d, arrivo a %d, ancora da analizzare %d\n", fileInfo[k].fileName, w[j].start, w[j].end, wordForProcessor[i]);
             strcpy(w[j].fileName, fileInfo[k].fileName);
             i++; 
             j++;
