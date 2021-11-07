@@ -1,7 +1,5 @@
-*.o
-*.out
 .vscode/
 trash/
+build/
 *.csv
 *.log
-build/
