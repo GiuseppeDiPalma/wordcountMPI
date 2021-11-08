@@ -12,9 +12,10 @@ void parse_arg(int argc, char **argv, char **path)
 	*path = NULL;
 	int opt, opt_index;
 
-	static struct option long_options[] = {
-		{"path", required_argument, 0, 'p'},
-		{0, 0, 0, 0}};
+	static struct option long_options[] =
+		{
+			{"path", required_argument, 0, 'p'},
+			{0, 0, 0, 0}};
 
 	while ((opt = getopt_long(argc, argv, "p:", long_options, &opt_index)) != -1)
 	{
@@ -36,26 +37,26 @@ void parse_arg(int argc, char **argv, char **path)
 
 int countFilesInDirectory(char *path)
 {
-    DIR *dir;
-    struct dirent *d;
+	DIR *dir;
+	struct dirent *d;
 
-    int count = 0;
+	int count = 0;
 
-    if ((dir = opendir(path)) != NULL)
-    {
-        while ((d = readdir(dir)) != NULL)
-        {
-            if (strcmp(d->d_name, "..") != 0 && strcmp(d->d_name, ".") != 0)
-            {
-                count++;
-            }
-        }
-        closedir(dir);
-    }
-    else
-    {
-        perror("Could not open directory!");
-        exit(0);
-    }
-    return count;
+	if ((dir = opendir(path)) != NULL)
+	{
+		while ((d = readdir(dir)) != NULL)
+		{
+			if (strcmp(d->d_name, "..") != 0 && strcmp(d->d_name, ".") != 0)
+			{
+				count++;
+			}
+		}
+		closedir(dir);
+	}
+	else
+	{
+		perror("Could not open directory!");
+		exit(0);
+	}
+	return count;
 }

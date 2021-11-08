@@ -36,7 +36,7 @@ void main(int argc, char *argv[])
     int countBK1 = 2;
     int blockcount[countBK], blockcount1[countBK1];
 
-    MPI_Datatype wordsType, filePerProcType, oldType[countBK], oldType1[countBK1];
+    MPI_Datatype wordsType, receivedDataType, oldType[countBK], oldType1[countBK1];
     MPI_Aint offsets[countBK], offsets1[countBK1], lb, extent;
 
     offsets[0] = offsetof(PartitionedWord, fileName);
@@ -60,8 +60,8 @@ void main(int argc, char *argv[])
     MPI_Type_get_extent(MPI_INT, &lb, &extent);
 
     //create type struct
-    MPI_Type_create_struct(countBK, blockcount, offsets, oldType, &filePerProcType);
-    MPI_Type_commit(&filePerProcType);
+    MPI_Type_create_struct(countBK, blockcount, offsets, oldType, &receivedDataType);
+    MPI_Type_commit(&receivedDataType);
 
     //save offset value after first field
     offsets1[0] = offsetof(Word, word);
@@ -69,23 +69,25 @@ void main(int argc, char *argv[])
     blockcount1[0] = WORDMAXSIZE;
     MPI_Type_get_extent(MPI_CHAR, &lb, &extent);
 
-    //space first field and second field
+    //space beetween two
     offsets1[1] = offsetof(Word, freq);
     oldType1[1] = MPI_INT;
     blockcount1[1] = 1;
     MPI_Type_get_extent(MPI_INT, &lb, &extent);
 
-    //create struct with fields
+    //create new struct
     MPI_Type_create_struct(countBK1, blockcount1, offsets1, oldType1, &wordsType);
     MPI_Type_commit(&wordsType);
 
     if (rank == 0)
     {
+        printf("\n-- START WORD COUNT --\n\n");
         parse_arg(argc, argv, &dirFile);
         int totalFiles = countFilesInDirectory(dirFile);
 
         FileWordSize fileSpec[totalFiles];
         int totalWords = readFilesAndSum(dirFile, fileSpec);
+
         printf("Total processor: #%d\n", size);
         printf("Total Words [%d]\n", totalWords);
 
@@ -93,11 +95,11 @@ void main(int argc, char *argv[])
 
         numSplits = wordForProcessor(partitions, wordsForProcessor, fileSpec, size);
 
-        int iStruct = 0; //indice di dove mi trovo all'interno della struttura
+        int iStruct = 0; //index position in struct
         int startForZero = 0;
         int sizeOfZero = 0;
 
-        //celle da passare a processo 1...
+        //cells for processor 0
         while (partitions[iStruct].rank == 0)
         {
             iStruct++;
@@ -108,14 +110,14 @@ void main(int argc, char *argv[])
         int sizeSend = -1;
         for (int i = 1; i < size; i++)
         {
-            sizeSend = 0;   //quanti elementi
-            base = iStruct; // Da dove parto
+            sizeSend = 0;
+            base = iStruct;
             while (partitions[iStruct].rank == i)
             {
                 iStruct++;
                 sizeSend++;
             }
-            MPI_Send(&partitions[base], sizeSend, filePerProcType, i, tag, MPI_COMM_WORLD);
+            MPI_Send(&partitions[base], sizeSend, receivedDataType, i, tag, MPI_COMM_WORLD);
         }
         sizeOfZero = wordCount(words, partitions, startForZero);
 
@@ -133,19 +135,20 @@ void main(int argc, char *argv[])
         double end = MPI_Wtime();
         double totalTimeMPI = end - start;
         printf("Total time: %lf seconds\n", totalTimeMPI);
+        printf("\n-- END WORD COUNT --\n");
     }
     else
     {
         int count = 0;
         int wordVectorLen = 0;
-        MPI_Recv(partitions, MAX_SPLITS, filePerProcType, source, tag, MPI_COMM_WORLD, &stat);
-        MPI_Get_count(&stat, filePerProcType, &count);
+        MPI_Recv(partitions, MAX_SPLITS, receivedDataType, source, tag, MPI_COMM_WORLD, &stat);
+        MPI_Get_count(&stat, receivedDataType, &count);
 
         wordVectorLen = wordCount(words, partitions, count);
         MPI_Ssend(words, wordVectorLen, wordsType, 0, tag, MPI_COMM_WORLD);
     }
 
     MPI_Type_free(&wordsType);
-    MPI_Type_free(&filePerProcType);
+    MPI_Type_free(&receivedDataType);
     MPI_Finalize();
 }

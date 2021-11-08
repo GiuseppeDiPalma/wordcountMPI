@@ -1,6 +1,6 @@
 #include "fileManage.h"
 /**
- * @brief 
+ * @brief Count number of words in each file.
  * 
  * @return int total number of worlds in file
  */
@@ -115,21 +115,20 @@ void elementSplit(int *wordForProcessor, long sumWords, int proc)
 }
 
 /**
- * @brief Questa funzione deve riempire la struttura da inviare ad ogni processore per la computazione.
- *        La struttura deve contenere i campi RANK, FILE_NAME, START, END, che poi saranno passati al processore.
+ * @brief fill structure to be sent to each processor for computation.
  * 
- * @param w Struttura che sarà riempita e inviata ai processi
- * @param wordForProcessor Array di numeri che contiene in ogni i-esima posizione il numero di parole che l'i-esimo processore deve analizzare
- * @param fileInfo Struttura che contiene le info di un file, path del file e il numero di parole contenuto in esso.
- * @param proc Numero di processori che effettuano la computazione
+ * @param w Structure that will be filled and sent to the processes.
+ * @param wordForProcessor Array of numbers containing in each position the number of words to be analysed.
+ * @param fileInfo Structure whit file spec.
+ * @param proc Number of processor in computation.
  * 
  * @return number of total split
  */
 int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fileInfo, int proc)
 {
-    int i = 0; //processi
-    int j = 0; //stuttura
-    int k = 0; //file
+    int i = 0;//processor
+    int j = 0;//structure
+    int k = 0;//file
 
     int offset = 0;
 
@@ -154,10 +153,8 @@ int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fi
             offset = w[j].end + 1;
             wordForProcessor[i] = 0;
             strcpy(w[j].fileName, fileInfo[k].fileName);
-            i++; 
-            j++;
+            i++; j++;
         }
     }
-
     return j;
 }

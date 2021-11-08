@@ -73,7 +73,7 @@ int mergeWords(Word *words, Word *words_received, int sizeForProcessor, int size
                 break;
             }
         }
-        if (j == sizeOfZero) // La parola non c'è
+        if (j == sizeOfZero) // no word
         {
             strcpy(words[j].word, words_received[i].word);
             words[j].freq = words_received[i].freq;
