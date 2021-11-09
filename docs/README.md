@@ -128,10 +128,85 @@ mpirun -n 4 src/word-count --path ../resources/small_files/
 
 # Benchmarks
 
+La soluzione è stata testata in un ambiente distribuito per constatarne la correttezza e la scalabilità. L'input è pensato per essere quanto simile ad un esempio reale e pratico.
+Le metriche utilizzare per la valutazione delle prestazioni sono:
+
+1. **Speedup** *(S)*: indica l'incremento prestazionale sullo stesso input tra l'esecuzione sequenziale e quella distribuita; Per *n* processori lo speedup massimo deve essere *n*; Questo dato ci indica quanto l'algoritmo è capace di sfruttare l'incremento prestazionale;
+2. **Efficienza** *(E)*: definisce la bontà della soluzione indicando quanto i tempi di esecuzione sequenziale e distribuita si avvicinino. In questo dato l'upper-bound è 1.
+
+$$
+S =\frac{Time_{sequential}}{Time_{parallel}}
+$$
+
+$$
+E = \frac{Time_{sequential}}{n * Time_{parallel}}
+$$
+
 ## Architettura di testing
+
+I benchmark sono stati condotti su **cloud AWS** in cui è stato messo appunto un cluster di 8 istanze EC2 modello **m5.large**.
+
+> Le istanze M5 sono le istanze a uso generico di ultima generazione basate su processori Intel Xeon® Platinum 8175M. Usate per Database di piccole e medie dimensioni, attività di elaborazione dati che richiedono più memoria, flotte di caching ed esecuzione di server back-end per SAP, Microsoft SharePoint, cluster computing ed altre applicazioni aziendali
+
+Ogni istanza m5.large ha queste caratteristiche:
+
+- Processori Intel Xeon® Platinum 8175M fino a 3,1 GHz (2vCPU);
+- 8GB RAM;
+- Fino a 25 Gbps di larghezza di banda di rete;
+- Fino a 4.750(Mb/s) larghezza di banda EBS;
+- 20 GB storage EBS.
+
+Le macchine hanno come Sistema Operativo *Ubuntu 20.04 (LTS) Focal Fossa* (ami-083654bd07b5da81d) e con nessun software aggiuntivo installato. Inoltre l'applicativo è l'unico in esecuzione per non rischiare che altri software possano invalidare le misurazioni.
 
 ## Esperimenti
 
-## Strong Scalability
+Gli esperimenti condotti sono stati definiti per verificare la capacità della soluzione proposta di scalare in un ambiente distribuito reale.
+
+> Per scalabilità si intende la capacità di un sistema di aumentare o diminuire le proprie performance in funzione delle necessità e disponibilità di risorse. La scalabilità può essere intesa come *verticale ed orizzontale*. Per scalabilità **verticale** si intende aumentare le risorse di una singola macchina (esempio, passare da 2 Gb Ram a 4Gb Ram), mentre per scalabilità **orizzontale** si intende invece aumentare le risorse ma andando ad incrementare i numeri di nodi che concorrono nella computazione.
+
+Per verificare la bontà della mia soluzione, ho eseguito i benchmark applicando la scalabilità orizzontale. Questa metrica si divide ulteriormente in due metriche differenti:
+
+- **Strong** Scalability;
+- **Weak** Scalability.
+
+### Strong Scalability
+
+In questo tipo di scalabilità la taglia dell'input resterà costante. Dunque questo dato ci permetterà di capire quanto l'applicativo velocizza il calcolo in una certa istanza del problema all'aumentare dei nodi.
+
+La *Strong scalability speedup* calcolato con la seguente formula:
+
+$$
+\\S_{strong}=(\frac{t_{1}}{t_{n}})
+$$
+
+- *n*: numero di nodi;
+- *t~1~* tempo di esecuzione per 1 nodo;
+- *t~n~* il tempo per n nodi.
+
+La *Strong scalability efficiency* calcolata con la seguente formula:
+
+$$
+\\E_{strong}=(\frac{t_{1}}{n*t_{n}})
+$$
+
+- *n* numero di nodi;
+- *t~1~* tempo di esecuzione per 1 nodo;
+- *t~n~* il tempo per n nodi.
+
+come deve essere il file di input
+
+### Weak scalability
+
+In questo tipo di scalabilità si verificano le prestazioni di un applicativo software quando l'input cresce proporzionalmente al numero dei nodi. In questo modo si può stimare l'impatto dell'overhead derivante dalla comunicazione nell'ambiente distribuito sulle performance del'applicaione.
+
+La *Weak scalability efficiency* è calcolata con questa formula:  
+
+$$
+\\E_{weak}=\frac{t_{1}}{t_{n}}
+$$
+
+- *n* numero di nodi;
+- *t~1~* tempo di esecuzione per 1 nodo;
+- *t~n~* il tempo per n nodi.
 
 # Conclusioni
