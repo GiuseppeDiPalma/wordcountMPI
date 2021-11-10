@@ -128,7 +128,7 @@ int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fi
 
 # Istruzioni per l'esecuzione
 
-Per la compilazione è stato usato CMAKE. Di seguito sono indicati i passi per poter eseguire in autonomia la compilazione e l'esecuzione:
+Per la compilazione è stato usato CMAKE[^3]. Di seguito sono indicati i passi per poter eseguire in autonomia la compilazione e l'esecuzione:
 
 **Build and compile:**
 
@@ -248,3 +248,4 @@ Senza ombra di dubbio all'algoritmo presentato è possibile apportare dei miglio
 
 [^1]: https://www.mpi-forum.org/docs/mpi-3.1/mpi31-report.pdf
 [^2]: https://aws.amazon.com/it/ec2/instance-types/c5/
+[^3]: https://cmake.org/
