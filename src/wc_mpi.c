@@ -92,8 +92,7 @@ void main(int argc, char *argv[])
         printf("Total Words [%d]\n", totalWords);
 
         elementSplit(wordsForProcessor, totalWords, size);
-
-        numSplits = wordForProcessor(partitions, wordsForProcessor, fileSpec, size);
+        numSplits = wordForProcessor(partitions, wordsForProcessor, fileSpec, size);        
 
         int iStruct = 0; //index position in struct
         int startForZero = 0;

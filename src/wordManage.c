@@ -25,7 +25,7 @@ int findWord(Word *w, char *word, int n_line)
 int wordCount(Word *w, PartitionedWord *wordSplit, int count)
 {
     int n_line = 0;
-    int word_vector_size = 0;
+    int wordVecSize = 0;
 
     int index_word = 0; //index of word in file
 
@@ -41,9 +41,9 @@ int wordCount(Word *w, PartitionedWord *wordSplit, int count)
                 strtok(c, "\n"); //remove "\n"
                 if ((index_word = findWord(w, c, TOTALWORDS)) == -1)
                 {
-                    strcpy(w[word_vector_size].word, c);
-                    w[word_vector_size].freq = 1;
-                    word_vector_size++;
+                    strcpy(w[wordVecSize].word, c);
+                    w[wordVecSize].freq = 1;
+                    wordVecSize++;
                 }
                 else
                     w[index_word].freq++;
@@ -53,7 +53,7 @@ int wordCount(Word *w, PartitionedWord *wordSplit, int count)
         n_line = 0;
         fclose(file);
     }
-    return word_vector_size;
+    return wordVecSize;
 }
 
 /**
