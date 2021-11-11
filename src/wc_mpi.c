@@ -90,26 +90,20 @@ void main(int argc, char *argv[])
 
         printf("Total processor: #%d\n", size);
         printf("Total Words [%d]\n", totalWords);
-        printf("size: %d | rank: %d\n", size, rank);
+
         elementSplit(wordsForProcessor, totalWords, size);
         numSplits = wordForProcessor(partitions, wordsForProcessor, fileSpec, size);        
 
         int iStruct = 0; //index position in struct
         int startForZero = 0;
         int sizeOfZero = 0;
-
-        for (int i = 0; i < numSplits; i++)
-        {
-            printf("rank: %d | start: %d | end: %d | fileName: %s\n", partitions[i].rank, partitions[i].start, partitions[i].end, partitions[i].fileName);
-        }
         
         //cells for processor 0
-        while(partitions[iStruct].rank == 0)
+        while(partitions[iStruct].rank == 0 && iStruct < numSplits)
         {
             iStruct++;
             startForZero++;
         }
-        printf("iStruct: %d\n", iStruct);
 
         int base = -1;
         int sizeSend = -1;
@@ -124,9 +118,7 @@ void main(int argc, char *argv[])
             }
             MPI_Send(&partitions[base], sizeSend, receivedDataType, i, tag, MPI_COMM_WORLD);
         }
-        printf("startForZero: %d\n", startForZero);
         sizeOfZero = wordCount(words, partitions, startForZero);
-        //sizeOfZero = wordCount(words, partitions, 4);
 
         int sizeForProcessor = 0;
         for (int p = 1; p < size; p++)
