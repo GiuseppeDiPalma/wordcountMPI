@@ -207,7 +207,7 @@ I benchmark sono stati condotti su **cloud AWS** in cui è stato messo appunto u
 
 > Le istanze C5 di Amazon EC2 forniscono prestazioni elevate a costi ridotti con un rapporto ottimale tra prezzi e potenza di calcolo, per eseguire carichi di lavoro avanzati a utilizzo intensivo di calcolo. Sono inclusi carichi di lavoro come server web ad alte prestazioni e High Performance Computing (HPC)[^2].
 
-Ogni istanza m5.large ha queste caratteristiche:
+Ogni istanza c5.large ha queste caratteristiche:
 
 - Intel Xeon Scalable 2a Gen/Intel Xeon Platinum serie 8000 (Skylake-SP) (2vCPU);
 - 4GB RAM;
