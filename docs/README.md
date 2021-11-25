@@ -77,16 +77,16 @@ $$
 
 con uno scarto di 1(per un solo processore) nel caso di numeroTotaleparole non divisibile, e dunque l'array di struct sarà così formato:
 
-|Proc|fileName|startLine|endLine|
-|-------|---------|-----|-------|
-|0|file1.txt|0|19|
-|0|file2.txt|0|59|
-|1|file2.txt|60|99|
-|1|file3.txt|0|39|
-|2|file3.txt|40|99|
-|2|file4.txt|0|19|
-|3|file4.txt|20|99|
-|...|...|...|...|
+| Proc | fileName  | startLine | endLine |
+| ---- | --------- | --------- | ------- |
+| 0    | file1.txt | 0         | 19      |
+| 0    | file2.txt | 0         | 59      |
+| 1    | file2.txt | 60        | 99      |
+| 1    | file3.txt | 0         | 39      |
+| 2    | file3.txt | 40        | 99      |
+| 2    | file4.txt | 0         | 19      |
+| 3    | file4.txt | 20        | 99      |
+| ...  | ...       | ...       | ...     |
 
 Ciò si legga come: "Il processore 0 legge dal file1.txt, da riga 0 a 19 (20 parole lette)" ecc...
 
@@ -126,6 +126,34 @@ int wordForProcessor(PartitionedWord *w, int *wordForProcessor, FileWordSize *fi
 }
 ```
 
+La funzione presentata di seguito, si occupa di unire le parole del processore master, con le parole che riceviamo dagli altri processori. Questa viene usata perchè quando ricevo delle parole posso avere la stessa parola anche in altri file che magari sono stati analizzati da altri processori, quindi devono essere comparare e nel caso sommate le frequenze.
+
+```c
+int mergeWords(Word *words, Word *words_received, int sizeForProcessor, int sizeOfZero)
+{
+    int j;
+
+    for (int i = 0; i < sizeForProcessor; i++)
+    {
+        for (j = 0; j < sizeOfZero; j++)
+        {
+            if (strcmp(words_received[i].word, words[j].word) == 0)
+            {
+                words[j].freq += words_received[i].freq;
+                break;
+            }
+        }
+        if (j == sizeOfZero) // no word
+        {
+            strcpy(words[j].word, words_received[i].word);
+            words[j].freq = words_received[i].freq;
+            sizeOfZero++;
+        }
+    }
+    return sizeOfZero;
+}
+```
+
 # Istruzioni per l'esecuzione
 
 Per la compilazione è stato usato CMAKE[^3]. Di seguito sono indicati i passi per poter eseguire in autonomia la compilazione e l'esecuzione:
@@ -137,23 +165,24 @@ bash run.sh
 ```
 
 Tutti i binari vengono aggiunti alla cartella appena creata `build`.
+Quindi dare: `cd build`:
 
 **Per esecuzione su un cluster di macchine**
 
 ```bash
-mpirun -np <NUM_PROCESSOR> --hostfile <HOSTFILE> wc_mpi.out --path <PATH_FILE_DIR>
+mpirun -np <NUM_PROCESSOR> --hostfile <HOSTFILE> src/word-count --path <PATH_FILE_DIR>
 ```
 
 **Per l'esecuzione di test su una singola macchina**
 
 ```bash
-mpirun -n <NUM_PROCESSOR> wc_mpi.out --path <PATH_FILE_DIR>
+mpirun -n <NUM_PROCESSOR> src/word-count --path <PATH_FILE_DIR>
 ```
 
 **Per lanciare un esempio veloce, dopo la compilazione può essere eseguito questo comando**
 
 ```bash
-mpirun -n 4 src/word-count --path ../resources/small_files/
+mpirun -n 4 src/word-count --path ../resources/4mb_file/
 ```
 
 # Benchmarks
@@ -186,17 +215,20 @@ Ogni istanza m5.large ha queste caratteristiche:
 - Fino a 4.750(Mb/s) larghezza di banda EBS;
 - 20 GB storage EBS.
 
-Le macchine hanno come Sistema Operativo *Ubuntu 20.04 (LTS) Focal Fossa - (ami-083654bd07b5da81d)* nessun software aggiuntivo installato(oltre quelli compresi nell'ami). Inoltre l'applicativo è l'unico in esecuzione, questo per evitare di inficiare le misurazioni.
+Le macchine hanno come Sistema Operativo *Ubuntu 20.04 (LTS) Focal Fossa - (ami-083654bd07b5da81d)* e nessun software aggiuntivo installato(oltre quelli compresi nell'ami). Inoltre l'applicativo è l'unico in esecuzione, questo per evitare di avere misurazioni contraffatte.
 
 ### Dataset
 
-Il dataset preso in considerazione è composto da 10 file txt, ognuno con 100000 parole italiane all'interno. Le parole sono disposte una su ogni riga. La dimensione di ogni file è $\approx$ 1Mb.
+Il dataset preso in considerazione è composto da 1 file txt, con 3999999 parole italiane all'interno. Le parole sono disposte una su ogni riga. La dimensione del file è $\approx$ 4Mb.
 
 ## Esperimenti
 
 Gli esperimenti condotti sono stati definiti per verificare la capacità della soluzione proposta di scalare in un ambiente distribuito reale.
 
 > Per scalabilità si intende la capacità di un sistema di aumentare o diminuire le proprie performance in funzione delle necessità e disponibilità di risorse. La scalabilità può essere intesa come *verticale ed orizzontale*. Per **scalabilità verticale** si intende aumentare le risorse di una singola macchina (esempio, passare da 2 Gb Ram a 4Gb Ram), mentre per **scalabilità orizzontale** si intende invece aumentare le risorse ma andando ad incrementare i numeri di nodi che concorrono nella computazione.
+
+
+Si noti che benchè le macchine EC2 c5.large posseggano 2 vCPU, i test sono stati lanciati su 1CPU che è l'effettivo core fisico. Queste macchine di fatti offrono si 2 vCPU, ma sono sfruttati in hyperthreading e quindi non utile ai nostri benchmarks[^4].
 
 Per verificare la bontà della mia soluzione, ho eseguito i benchmark applicando la scalabilità orizzontale. Questa metrica si divide ulteriormente in due metriche differenti:
 
@@ -227,9 +259,21 @@ $$
 - *t~1~* tempo di esecuzione per 1 nodo;
 - *t~n~* il tempo per n nodi.
 
+Di seguito sono state graficate le misurazioni:
+
+![Tempi Strong Scalability](img/timeSTRONG.png)
+
+![SpeedUP Strong Scalability](img/speedUpSRONG.png)
+
+![Efficienza Strong Scalability](img/efficienzaSTRONG.png)
+
 ### Weak scalability
 
 In questo tipo di scalabilità si verificano le prestazioni di un applicativo software quando l'input cresce proporzionalmente al numero dei nodi. In questo modo si può stimare l'impatto dell'overhead derivante dalla comunicazione nell'ambiente distribuito sulle performance dell'applicazione.
+
+| Proc | 1  | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+| ---- | --------- | --------- | ------- | --------- | ------- | --------- | ------- |
+| N.word| 499999  | 999998 | 1499997 | 1999996 | 2499995 | 2999994 | 3499993 | 3999992 |
 
 La *Weak scalability efficiency* è calcolata con questa formula:  
 
@@ -241,11 +285,18 @@ $$
 - *t~1~* tempo di esecuzione per 1 nodo;
 - *t~n~* il tempo per n nodi.
 
+Di seguito sono state graficate le misurazioni:
+
+![Efficienza Weak Scalability](img/efficienzaWEAK.png)
+
 # Conclusioni
 
-In queste pagine è stata presentata la mia personale soluzione al problema Word Count spiegato in precedenza. Si nota come con l'aumentare del numero di nodi le prestazioni migliorino.
-Senza ombra di dubbio all'algoritmo presentato è possibile apportare dei miglioramenti sia lato stilistico che lato prestazionali, riuscendo a rendere l'algoritmo ancora più prestazionale.
+Ho presentato una possibile soluzione al problema Word Count, che consiste nel determinare il numero di occorrenze di ogni parola presente in un file/insieme di file. La soluzione è stata scritta usando il paradigma di message passing proprio di MPI.
+La soluzione mostra scarsa stabilità del software, per quanto riguarda lo speedUp, mentre c'è un'ottima stabilità quando si parla di efficienza fra la scalabilità Strong e scalabilità Weak.
+
+La soluzione può ovviamente essere migliorata. Si deve tenere anche conto che i tempi misurati tendono comunque ad aumentare aggiungendo una fase di pre-processing.
 
 [^1]: https://www.mpi-forum.org/docs/mpi-3.1/mpi31-report.pdf
 [^2]: https://aws.amazon.com/it/ec2/instance-types/c5/
 [^3]: https://cmake.org/
+[^4]: https://aws.amazon.com/it/ec2/physicalcores/
