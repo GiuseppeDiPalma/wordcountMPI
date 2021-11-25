@@ -17,13 +17,13 @@ All binaries are added to the build folder!
 ON cluster:
 
 ```bash
-mpirun -np <NUM_PROCESSOR> --hostfile <HOSTFILE> wc_mpi.out --path <PATH_FILE_DIR>
+mpirun -np <NUM_PROCESSOR> --hostfile <HOSTFILE> src/word-count --path <PATH_FILE_DIR>
 ```
 
 ON single machine:
 
 ```bash
-mpirun -n <NUM_PROCESSOR> wc_mpi.out --path <PATH_FILE_DIR>
+mpirun -n <NUM_PROCESSOR> src/word-count --path <PATH_FILE_DIR>
 ```
 
 ### Run fast example
