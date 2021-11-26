@@ -34,6 +34,6 @@ To run a test with the included files:
 mpirun -n 4 src/word-count --path ../resources/small_files/
 ```
 
-#### Authors
+#### Author
 
 - Giuseppe Di Palma
